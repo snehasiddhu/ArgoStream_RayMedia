@@ -1,0 +1,36 @@
+========================================
+Authenticate Minikube to Amazon ECR
+========================================
+
+Since Minikube does not have AWS credentials by default, you need to authenticate it manually.
+
+-----------------------------
+Step 1: Get ECR Login Token  
+Run the following command on your local machine:
+
+aws ecr get-login-password --region <your-region> | docker login --username AWS --password-stdin <aws-account-id>.dkr.ecr.<your-region>.amazonaws.com
+
+-----------------------------
+Step 2: Create a Secret  
+To allow Kubernetes to pull images from ECR, create a secret:
+
+kubectl create secret docker-registry ecr-secret \
+  --docker-server=<aws-account-id>.dkr.ecr.<your-region>.amazonaws.com \
+  --docker-username=AWS \
+  --docker-password=$(aws ecr get-login-password --region <your-region>)
+
+-----------------------------
+
+Step 3: Deploy the Application  
+Apply the deployment and expose the service:
+
+kubectl apply -f my-deployment.yaml
+kubectl get svc
+
+-----------------------------
+Step 4: Port Forward the Service  
+To access your service locally:
+
+kubectl port-forward svc/mywebapp-service -n default 8081:80
+
+Now, you can access your application at http://localhost:8081.
