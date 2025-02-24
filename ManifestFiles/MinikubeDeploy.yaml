@@ -3,10 +3,8 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: mywebapp-deployment
-  labels:
-    app: mywebapp
 spec:
-  replicas: 2
+  replicas: 3
   selector:
     matchLabels:
       app: mywebapp
@@ -15,21 +13,13 @@ spec:
       labels:
         app: mywebapp
     spec:
+      imagePullSecrets:
+        - name: ecr-secret  
       containers:
         - name: mywebapp
-          image: 637423294516.dkr.ecr.us-east-1.amazonaws.com/mywebapp:latest  # Updated image registry
-          ports:
-            - containerPort: 8080
-          env:
-            - name: ASPNETCORE_ENVIRONMENT
-              value: "Production"
-          resources:
-            limits:
-              cpu: "500m"
-              memory: "512Mi"
-            requests:
-              cpu: "250m"
-              memory: "256Mi"
+          image: 637423294516.dkr.ecr.us-east-1.amazonaws.com/mywebapp:latest
+          imagePullPolicy: Always
+
 ---
 apiVersion: v1
 kind: Service
