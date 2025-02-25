@@ -1,0 +1,54 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mywebapp-deployment
+  labels:
+    app: mywebapp
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: mywebapp
+  template:
+    metadata:
+      labels:
+        app: mywebapp
+    spec:
+      imagePullSecrets:
+        - name: ecr-secret  
+      containers:
+        - name: mywebapp
+          image: 637423294516.dkr.ecr.us-east-1.amazonaws.com/mywebapp:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 80  # Ensure the app inside the container is listening on port 80
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 80
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 80
+            initialDelaySeconds: 5
+            periodSeconds: 10
+      terminationGracePeriodSeconds: 30  # Graceful shutdown
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mywebapp-service
+  annotations:
+    service.beta.kubernetes.io/aws-load-balancer-type: "nlb"  # Use Network Load Balancer (NLB)
+spec:
+  selector:
+    app: mywebapp
+  ports:
+    - protocol: TCP
+      port: 80       # External traffic
+      targetPort: 80  # Internal container port
+  type: LoadBalancer  # Exposes service externally
