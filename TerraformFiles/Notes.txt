@@ -1,3 +1,5 @@
+Download AWS CLI and configure the profile with Iam access keys
+Install Kubectl
 Create s3 bucket in aws console
 
 ---
