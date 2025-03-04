@@ -1,0 +1,17 @@
+Create s3 bucket in aws console
+
+---
+
+Configure Table Settings
+Table name → terraform-lock-table
+Partition key (Primary Key) → LockID (Type: String)
+Sort key (Optional) → Leave it blank
+Table settings → Choose Default settings (On-Demand) or select Provisioned if you want to set read/write capacity manually.
+
+---
+terraform init
+terraform plan
+terraform apply
+aws eks --region ap-south-1 update-kubeconfig --name argostream_eks
+kubectl config current-context
+kubectl get nodes  
