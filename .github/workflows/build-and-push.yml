@@ -81,4 +81,21 @@ jobs:
           docker build -t $ECR_REPOSITORY:$IMAGE_TAG -t $ECR_REPOSITORY:latest -f src/MyWebApp/Dockerfile .
           docker push $ECR_REPOSITORY:$IMAGE_TAG
           docker push $ECR_REPOSITORY:latest
+  # notify:
+  #   name: Send Build Notification
+  #   runs-on: ubuntu-latest
+  #   needs: build  # Runs only if the 'build' job succeeds
+  #   steps:
+  #     - name: Send Email
+  #       uses: dawidd6/action-send-mail@v3
+  #       with:
+  #         server_address: smtp.gmail.com
+  #         server_port: 587
+  #         username: ${{ secrets.EMAIL_USERNAME }}
+  #         password: ${{ secrets.EMAIL_PASSWORD }}
+  #         subject: "✅ Build & Deployment Successful!"
+  #         body: "The .NET application has been successfully built and pushed to AWS ECR."
+  #         to: your-email@gmail.com
+  #         from: "GitHub Actions <your-email@gmail.com>"
+
 
