@@ -19,7 +19,7 @@ spec:
         - name: ecr-secret  
       containers:
         - name: mywebapp
-          image: 637423294516.dkr.ecr.ap-south-1.amazonaws.com/mywebapp:latest
+          image: 637423294516.dkr.ecr.ap-south-1.amazonaws.com/mywebapp:{{IMAGE_TAG}}
           imagePullPolicy: Always
           ports:
             - containerPort: 80  # Ensure the app inside the container is listening on port 80
