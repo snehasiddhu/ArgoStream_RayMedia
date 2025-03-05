@@ -1,4 +1,4 @@
-name: Build and Deploy .NET App to AWS EKS via ArgoCD
+name: Build and Push .NET App to AWS ECR
 
 on:
   push:
@@ -6,6 +6,10 @@ on:
 
 permissions:
   contents: read
+
+env:
+  AWS_REGION: ap-south-1
+  ECR_REPOSITORY: 637423294516.dkr.ecr.ap-south-1.amazonaws.com/mywebapp
 
 jobs:
   build:
@@ -15,26 +19,23 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v3
 
-      - name: Check AWS CLI Version
-        run: aws --version
-
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v2
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ap-south-1
+          aws-region: ${{ env.AWS_REGION }}
 
       - name: Login to Amazon ECR
         run: |
-          aws ecr get-login-password --region ap-south-1 | docker login --username AWS --password-stdin 637423294516.dkr.ecr.ap-south-1.amazonaws.com
+          aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $ECR_REPOSITORY
 
       - name: Build and Push Docker Image
         run: |
-          IMAGE_TAG=$(date +%s)  # Unique timestamp-based tag
-          docker build -t 637423294516.dkr.ecr.ap-south-1.amazonaws.com/mywebapp:$IMAGE_TAG -f src/MyWebApp/Dockerfile .
-          docker push 637423294516.dkr.ecr.ap-south-1.amazonaws.com/mywebapp:$IMAGE_TAG
-          echo "IMAGE_TAG=$IMAGE_TAG" >> $GITHUB_ENV
+          IMAGE_TAG=$(date +%s)  # Generate a timestamp-based tag
+          echo "IMAGE_TAG=$IMAGE_TAG" >> $GITHUB_ENV  # Save it for the next step
+          docker build -t $ECR_REPOSITORY:$IMAGE_TAG -f src/MyWebApp/Dockerfile .
+          docker push $ECR_REPOSITORY:$IMAGE_TAG
 
   update-k8s-manifest:
     name: Update Kubernetes Deployment File
@@ -44,15 +45,15 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v3
 
-      - name: Update Deployment YAML with New Image
+      - name: Update Deployment YAML with New Image Tag
         run: |
           sed -i "s|637423294516.dkr.ecr.ap-south-1.amazonaws.com/mywebapp:.*|637423294516.dkr.ecr.ap-south-1.amazonaws.com/mywebapp:$IMAGE_TAG|g" k8s-manifests/deployment.yaml
-          cat k8s-manifests/deployment.yaml
+          cat k8s-manifests/deployment.yaml  # Verify changes
 
       - name: Commit & Push Changes
         run: |
           git config --global user.email "divyajyothivundavalli@gmail.com"
           git config --global user.name "DivyaJyothiVundavalli"
           git add k8s-manifests/deployment.yaml
-          git commit -m "Update image tag to $IMAGE_TAG"
+          git commit -m "Updated image tag to $IMAGE_TAG"
           git push origin main
