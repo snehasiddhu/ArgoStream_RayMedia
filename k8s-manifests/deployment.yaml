@@ -1,6 +1,6 @@
 ---
 apiVersion: apps/v1
-kind: Deployment
+kind: Deployment #type of k8 components
 metadata:
   name: mywebapp-deployment
   labels:
