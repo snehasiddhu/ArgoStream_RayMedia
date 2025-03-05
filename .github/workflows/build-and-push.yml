@@ -36,6 +36,10 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
+        
+      - name: Authenticate to AWS ECR
+        run: |
+          aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $ECR_REPOSITORY
 
       - name: Run Security Scan (Trivy)
         uses: aquasecurity/trivy-action@master
