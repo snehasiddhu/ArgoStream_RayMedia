@@ -56,22 +56,3 @@ jobs:
           git add k8s-manifests/deployment.yaml
           git commit -m "Update image tag to $IMAGE_TAG"
           git push origin main
-
-  deploy:
-    name: Deploy to AWS EKS with Argo CD
-    needs: update-k8s-manifest
-    runs-on: ubuntu-latest
-    steps:
-      - name: Install Argo CD CLI
-        run: |
-          curl -sSL -o argocd-linux-amd64 https://github.com/argoproj/argo-cd/releases/latest/download/argocd-linux-amd64
-          chmod +x argocd-linux-amd64
-          sudo mv argocd-linux-amd64 /usr/local/bin/argocd
-
-      - name: Login to Argo CD
-        run: |
-          argocd login ${{ secrets.ARGOCD_SERVER }} --username ${{ secrets.ARGOCD_USERNAME }} --password ${{ secrets.ARGOCD_PASSWORD }} --insecure
-
-      - name: Sync Argo CD Application
-        run: |
-          argocd app sync rayframesmedia-dashboard
