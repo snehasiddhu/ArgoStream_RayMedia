@@ -12,6 +12,23 @@ env:
   ECR_REPOSITORY: 637423294516.dkr.ecr.ap-south-1.amazonaws.com/mywebapp
 
 jobs:
+  test:
+    name: Run Tests & Code Quality Checks
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: '8.0'
+
+      - name: Restore Dependencies
+        run: dotnet restore src/MyWebApp
+
+      - name: Run Unit Tests
+        run: dotnet test src/MyWebApp --no-restore --verbosity normal
   build:
     name: Build & Push Docker Image to AWS ECR
     runs-on: ubuntu-latest
