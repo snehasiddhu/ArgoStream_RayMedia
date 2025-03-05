@@ -1,11 +1,10 @@
 # Use official .NET SDK image to build the app
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
-WORKDIR /app
+WORKDIR /app/MyWebApp
 
 # Copy the project file and restore dependencies
-COPY src/MyWebApp/MyWebApp.csproj ./MyWebApp/
-WORKDIR /app/MyWebApp
-RUN dotnet restore
+COPY src/MyWebApp/MyWebApp.csproj ./
+RUN dotnet restore  # Removed the extra dot
 
 # Copy the entire project and build the app
 COPY src/MyWebApp/. ./
@@ -16,11 +15,12 @@ FROM mcr.microsoft.com/dotnet/aspnet:8.0
 WORKDIR /app
 COPY --from=build /out .
 
-# Expose the port used in Program.cs
-EXPOSE 8080
+# Expose the port used in Program.cs (Ensure this matches your deployment.yaml)
+EXPOSE 80  
 
 # Start the application
 CMD ["dotnet", "MyWebApp.dll"]
+
 
 
 # ---
